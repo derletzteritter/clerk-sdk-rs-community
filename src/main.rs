@@ -44,6 +44,13 @@ pub struct User {
     pub banned: bool,
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+pub struct DeleteResponse {
+    pub id: Option<String>,
+    pub object: Option<String>,
+    pub deleted: bool,
+}
+
 impl Client {
     fn new(token: String) -> Client {
         let auth_token = format!("Bearer {}", token);
@@ -98,18 +105,19 @@ impl Client {
     pub async fn read_user(&self, user_id: String) -> Result<User, reqwest::Error> {
         let url = format!("{}{}{}", self.base_url, "users/", user_id);
 
-        let res = self.http_client
+        self.http_client
             .get(&url)
             .send()
             .await?
-            .json::<User>().await;
-
-        match res {
-            Ok(res) => {
-                Ok(res)
-            }
-            Err(err) => Err(err),
-        }
+            .json::<User>().await
+    }
+    
+    pub async fn delete_user(&self, user_id: String) -> Result<DeleteResponse, reqwest::Error> {
+        let url = format!("{}{}{}", self.base_url, "users/", user_id);
+        self.http_client
+            .delete(&url)
+            .send()
+            .await?.json::<DeleteResponse>().await
     }
 }
 
