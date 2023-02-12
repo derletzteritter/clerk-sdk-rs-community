@@ -45,6 +45,63 @@ pub struct User {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
+pub struct CreateUserParams {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub email_addresses: Option<Vec<String>>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub phone_numbers: Option<Vec<String>>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub web3_wallets: Option<Vec<String>>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub username: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub password: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub first_name: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub last_name: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub external_id: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub unsafe_metadata: Option<serde_json::Value>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub public_metadata: Option<serde_json::Value>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub private_metadata: Option<serde_json::Value>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub password_digest: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub password_hasher: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub skip_password_requirements: Option<bool>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub skip_password_check: Option<bool>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub totp_secret: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub backup_codes: Option<Vec<String>>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub created_at: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct DeleteResponse {
     pub id: Option<String>,
     pub object: Option<String>,
@@ -118,6 +175,12 @@ impl Client {
             .delete(&url)
             .send()
             .await?.json::<DeleteResponse>().await
+    }
+
+    pub async fn create_user(&self, params: CreateUserParams) -> Result<User, reqwest::Error> {
+        let url = format!("{}{}", self.base_url, "users");
+
+        self.http_client.post(&url).json(&params).send().await?.json::<User>().await
     }
 }
 
