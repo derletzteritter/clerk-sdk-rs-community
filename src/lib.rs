@@ -159,6 +159,13 @@ pub struct DeleteResponse {
     pub deleted: bool,
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+pub struct UpdateUserMetadata {
+    public_metadata: serde_json::Value,
+    private_metadata: serde_json::Value,
+    unsafe_metadata: serde_json::Value,
+}
+
 impl Client {
     pub fn new(token: String) -> Client {
         let auth_token = format!("Bearer {}", token);
@@ -218,5 +225,11 @@ impl Client {
         let url = format!("{}{}{}", self.base_url, "users/", user_id);
 
         self.http_client.patch(&url).json(&params).send().await?.json::<User>().await
+    }
+
+    pub async fn update_user_metadata(&self, user_id: String, metadata_request: UpdateUserMetadata) -> Result<User, reqwest::Error> {
+        let url = format!("{}{}{}/metadata", self.base_url, "users/", user_id);
+
+        self.http_client.patch(&url).json(&metadata_request).send().await?.json::<User>().await
     }
 }
