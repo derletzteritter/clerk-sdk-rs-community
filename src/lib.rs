@@ -232,4 +232,16 @@ impl Client {
 
         self.http_client.patch(&url).json(&metadata_request).send().await?.json::<User>().await
     }
+
+    pub async fn ban_user(&self, user_id: String) -> Result<User, reqwest::Error> {
+        let url = format!("{}{}{}/ban", self.base_url, "users/", user_id);
+
+        self.http_client.post(&url).send().await?.json::<User>().await
+    }
+
+    pub async fn unban_user(&self, user_id: String) -> Result<User, reqwest::Error> {
+        let url = format!("{}{}{}/unban", self.base_url, "users/", user_id);
+
+        self.http_client.post(&url).send().await?.json::<User>().await
+    }
 }
