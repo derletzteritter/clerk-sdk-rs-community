@@ -153,24 +153,24 @@ pub struct DeleteResponse {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct UpdateUserMetadata {
-    public_metadata: serde_json::Value,
-    private_metadata: serde_json::Value,
-    unsafe_metadata: serde_json::Value,
+    pub public_metadata: serde_json::Value,
+    pub private_metadata: serde_json::Value,
+    pub unsafe_metadata: serde_json::Value,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct SMSMessage {
-    messsage: String,
-    phone_number_id: String,
+    pub message: String,
+    pub phone_number_id: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct SMSMessageResponse {
-    object: String,
-    id: String,
-    from_phone_number: String,
-    to_phone_number: String,
-    status: String,
-    delivery_status: bool,
-    data: serde_json::Value,
+    pub object: String,
+    pub id: String,
+    pub from_phone_number: String,
+    pub to_phone_number: String,
+    pub status: String,
+    pub delivery_status: bool,
+    pub data: serde_json::Value,
 }

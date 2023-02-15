@@ -1,10 +1,16 @@
 use clerk_rs::Client;
+use clerk_rs::model;
 
 #[tokio::main]
 async fn main() {
     let client = Client::new("".to_string());
 
-    let users = client.read_user("".to_string()).await.unwrap();
+    let message = model::SMSMessage{
+        message: "Hello from Clerk!".to_string(),
+        phone_number_id: "phone_number_id".to_string(),
+    };
 
-    println!("{:?}", users);
+    let response = client.create_sms(message).await.unwrap();
+
+    println!("{:?}", response);
 }

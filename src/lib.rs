@@ -1,7 +1,7 @@
 use model::{SMSMessage, SMSMessageResponse, User, DeleteResponse, UpdateUserParams, CreateUserParams, UpdateUserMetadata};
 use reqwest::header::{HeaderMap, AUTHORIZATION};
 
-mod model;
+pub mod model;
 
 pub struct Client {
     pub token: String,
@@ -92,6 +92,13 @@ impl Client {
     // SMS
     pub async fn create_sms(&self, message: SMSMessage) -> Result<SMSMessageResponse, reqwest::Error> {
         let url = format!("{}{}", self.base_url, "sms_messages");
+
+        self.http_client.post(&url).json(&message).send().await?.json::<SMSMessageResponse>().await
+    }
+
+    // EMAILS
+    pub async fn create_email(&self, message: SMSMessage) -> Result<SMSMessageResponse, reqwest::Error> {
+        let url = format!("{}{}", self.base_url, "emails");
 
         self.http_client.post(&url).json(&message).send().await?.json::<SMSMessageResponse>().await
     }
