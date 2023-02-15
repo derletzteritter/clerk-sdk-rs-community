@@ -1,5 +1,8 @@
+use model::{SMSMessage, SMSMessageResponse};
 use reqwest::header::{HeaderMap, AUTHORIZATION};
 use serde::{Deserialize, Serialize};
+
+mod model;
 
 
 pub struct Client {
@@ -187,6 +190,7 @@ impl Client {
         }
     }
 
+    // USERS
     pub async fn list_all_users(&self) -> Result<Vec<User>, reqwest::Error> {
         let url = format!("{}{}", self.base_url, "users");
 
@@ -243,5 +247,12 @@ impl Client {
         let url = format!("{}{}{}/unban", self.base_url, "users/", user_id);
 
         self.http_client.post(&url).send().await?.json::<User>().await
+    }
+
+    // SMS
+    pub async fn create_sms(&self, message: SMSMessage) -> Result<SMSMessageResponse, reqwest::Error> {
+        let url = format!("{}{}", self.base_url, "sms_messages");
+
+        self.http_client.post(&url).json(&message).send().await?.json::<SMSMessageResponse>().await
     }
 }
