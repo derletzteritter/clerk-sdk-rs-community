@@ -1,7 +1,9 @@
-use model::{SMSMessage, SMSMessageResponse, User, DeleteResponse, UpdateUserParams, CreateUserParams, UpdateUserMetadata};
+use model::{SMSMessage, SMSMessageResponse, DeleteResponse, UpdateUserParams, CreateUserParams, UpdateUserMetadata};
 use reqwest::header::{HeaderMap, AUTHORIZATION};
+use crate::users::User;
 
 pub mod model;
+pub mod users;
 
 pub struct Client {
     pub token: String,
@@ -28,65 +30,6 @@ impl Client {
             base_url: prod_url.to_string(),
             http_client: client,
         }
-    }
-
-    // USERS
-    pub async fn list_all_users(&self) -> Result<Vec<User>, reqwest::Error> {
-        let url = format!("{}{}", self.base_url, "users");
-
-        self.http_client 
-            .get(&url)
-            .send()
-            .await?
-            .json::<Vec<User>>().await
-    }
-
-    pub async fn read_user(&self, user_id: String) -> Result<User, reqwest::Error> {
-        let url = format!("{}{}{}", self.base_url, "users/", user_id);
-
-        self.http_client
-            .get(&url)
-            .send()
-            .await?
-            .json::<User>().await
-    }
-    
-    pub async fn delete_user(&self, user_id: String) -> Result<DeleteResponse, reqwest::Error> {
-        let url = format!("{}{}{}", self.base_url, "users/", user_id);
-        self.http_client
-            .delete(&url)
-            .send()
-            .await?.json::<DeleteResponse>().await
-    }
-
-    pub async fn create_user(&self, params: CreateUserParams) -> Result<User, reqwest::Error> {
-        let url = format!("{}{}", self.base_url, "users");
-
-        self.http_client.post(&url).json(&params).send().await?.json::<User>().await
-    }
-
-    pub async fn update_user(&self, user_id: String, params: UpdateUserParams) -> Result<User, reqwest::Error> {
-        let url = format!("{}{}{}", self.base_url, "users/", user_id);
-
-        self.http_client.patch(&url).json(&params).send().await?.json::<User>().await
-    }
-
-    pub async fn update_user_metadata(&self, user_id: String, metadata_request: UpdateUserMetadata) -> Result<User, reqwest::Error> {
-        let url = format!("{}{}{}/metadata", self.base_url, "users/", user_id);
-
-        self.http_client.patch(&url).json(&metadata_request).send().await?.json::<User>().await
-    }
-
-    pub async fn ban_user(&self, user_id: String) -> Result<User, reqwest::Error> {
-        let url = format!("{}{}{}/ban", self.base_url, "users/", user_id);
-
-        self.http_client.post(&url).send().await?.json::<User>().await
-    }
-
-    pub async fn unban_user(&self, user_id: String) -> Result<User, reqwest::Error> {
-        let url = format!("{}{}{}/unban", self.base_url, "users/", user_id);
-
-        self.http_client.post(&url).send().await?.json::<User>().await
     }
 
     // SMS

@@ -4,36 +4,15 @@ use serde::{Deserialize, Serialize};
 pub struct EmailAddress {
     pub id: Option<String>,
     pub object: Option<String>,
-    pub email_address: String,
+    pub email_address: Option<String>,
     pub reserved: bool,
-    pub linked_to: Vec<String>,
+    pub linked_to: Option<Vec<LinkedTo>>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct User {
+pub struct LinkedTo {
+    pub r#type: String,
     pub id: String,
-    pub object: String,
-    pub username: Option<String>,
-    pub first_name: Option<String>,
-    pub last_name: Option<String>,
-    pub gender: Option<String>,
-    pub birthday: Option<String>,
-    pub profile_image_url: Option<String>,
-    pub primary_email_address_id: Option<String>,
-    pub primary_phone_number_id: Option<String>,
-    pub primary_web3_address_id: Option<String>,
-    pub password_enabled: bool,
-    pub two_factor_enabled: bool,
-    pub totp_enabled: bool,
-    pub backup_code_enabled: bool,
-    pub email_addresses: Option<Vec<EmailAddress>>,
-
-    // ... more fields
-    pub external_id: Option<String>,
-    pub last_sign_in_at: Option<i64>,
-    pub created_at: i64,
-    pub updated_at: i64,
-    pub banned: bool,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
