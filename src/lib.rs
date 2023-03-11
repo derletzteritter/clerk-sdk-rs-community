@@ -2,6 +2,7 @@ use reqwest::header::{HeaderMap, AUTHORIZATION};
 
 pub mod emails;
 pub mod model;
+pub mod phone_numbers;
 pub mod sms;
 pub mod users;
 
