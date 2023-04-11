@@ -1,34 +1,56 @@
 use serde::{Deserialize, Serialize};
+use crate::{Client, model::{DeleteResponse, CreateUserParams, UpdateUserParams, UpdateUserMetadata}};
 
-use crate::{Client, model::{EmailAddress, DeleteResponse, CreateUserParams, UpdateUserParams, UpdateUserMetadata}};
+#[derive(Debug, Serialize, Deserialize)]
+pub struct EmailAddressVerification {
+    pub status: String,
+    pub strategy: String,
+    pub attemps: Option<i32>,
+    pub expire_at: Option<i32>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct EmailAddressLinkedTo {
+    pub r#type: String,
+    pub id: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct EmailAddress {
+    pub id: String,
+    pub object: String,
+    pub email_address: String,
+    pub reserved: bool,
+    pub verification: Option<EmailAddressVerification>,
+    pub linked_to: Option<Vec<EmailAddressLinkedTo>>,
+}
 
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct User {
     pub id: String,
     pub object: String,
-    pub username: Option<String>,
-    pub first_name: Option<String>,
-    pub last_name: Option<String>,
-    pub gender: Option<String>,
-    pub birthday: Option<String>,
-    pub profile_image_url: Option<String>,
+    pub external_id: Option<String>,
     pub primary_email_address_id: Option<String>,
     pub primary_phone_number_id: Option<String>,
     pub primary_web3_address_id: Option<String>,
+    pub username: Option<String>,
+    pub first_name: Option<String>,
+    pub last_name: Option<String>,
+    pub profile_image_url: String,
+    pub gender: Option<String>,
+    pub birthday: Option<String>,
     pub password_enabled: bool,
     pub two_factor_enabled: bool,
     pub totp_enabled: bool,
     pub backup_code_enabled: bool,
-    pub email_addresses: Option<Vec<EmailAddress>>,
-
-    // ... more fields
-    pub external_id: Option<String>,
+    pub email_addresses: Vec<EmailAddress>,
     pub last_sign_in_at: Option<i64>,
     pub created_at: i64,
     pub updated_at: i64,
     pub banned: bool,
 }
+
 
 impl User {
     pub async fn list_all_users(client: &Client) -> Result<Vec<User>, reqwest::Error> {
@@ -41,7 +63,7 @@ impl User {
                     Err(e) => Err(e),
                 }
             }
-            Err(e) => Err(e),
+            Err(e) => Err(e)
         }
     }
 
