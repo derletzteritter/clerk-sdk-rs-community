@@ -1,12 +1,12 @@
 use serde::{Deserialize, Serialize};
-use crate::{Client, model::{DeleteResponse, CreateUserParams, UpdateUserParams, UpdateUserMetadata}};
+use crate::{Client, model::{DeleteResponse, CreateUserParams, UpdateUserParams, UpdateUserMetadata}, error::{ClientError, ErrorResponse}};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct EmailAddressVerification {
     pub status: String,
     pub strategy: String,
     pub attemps: Option<i32>,
-    pub expire_at: Option<i32>,
+    pub expire_at: Option<i64>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -51,19 +51,20 @@ pub struct User {
     pub banned: bool,
 }
 
-
 impl User {
-    pub async fn list_all_users(client: &Client) -> Result<Vec<User>, reqwest::Error> {
+    pub async fn list_all_users(client: &Client) -> Result<Vec<User>, ClientError> {
         let url = format!("{}{}", client.base_url, "users");
 
-        match client.http_client.get(&url).send().await {
-            Ok(response) => {
-                match response.json::<Vec<User>>().await {
-                    Ok(user) => Ok(user),
-                    Err(e) => Err(e),
-                }
-            }
-            Err(e) => Err(e)
+        let res = client.http_client.get(&url).send().await.map_err(ClientError::Reqwest)?;
+        let status = res.status();
+
+        if status.is_success() {
+            let body = res.json::<Vec<User>>().await.map_err(ClientError::Reqwest)?;
+            Ok(body)
+        } else {
+            let err_body: ErrorResponse = res.json().await?;
+
+            Err(ClientError::ErrorResponse(err_body))
         }
     }
 
@@ -108,7 +109,6 @@ impl User {
             }
             Err(e) => Err(e),
         }
-
     }
 
     pub async fn update_user(client: &Client, user_id: String, params: UpdateUserParams) -> Result<User, reqwest::Error> {

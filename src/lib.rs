@@ -1,5 +1,7 @@
 use reqwest::header::{HeaderMap, AUTHORIZATION};
 
+mod error;
+
 pub mod actor_tokens;
 pub mod emails;
 pub mod model;
