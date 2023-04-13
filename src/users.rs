@@ -68,94 +68,115 @@ impl User {
         }
     }
 
-    pub async fn read_user(client: &Client, user_id: String) -> Result<User, reqwest::Error> {
+    pub async fn read_user(client: &Client, user_id: String) -> Result<User, ClientError> {
         let url = format!("{}{}{}", client.base_url, "users/", user_id);
 
-        match client.http_client.get(&url).send().await {
-            Ok(response) => {
-                match response.json::<User>().await {
-                    Ok(user) => Ok(user),
-                    Err(e) => Err(e),
-                }
-            }
-            Err(e) => Err(e),
+        let res = client.http_client.get(&url).send().await.map_err(ClientError::Reqwest)?;
+        let status = res.status();
+
+        if status.is_success() {
+            let body = res.json::<User>().await.map_err(ClientError::Reqwest)?;
+            Ok(body)
+        } else {
+            let err_body: ErrorResponse = res.json().await?;
+
+            Err(ClientError::ErrorResponse(err_body))
         }
     }
 
-    pub async fn delete_user(client: &Client, user_id: String) -> Result<DeleteResponse, reqwest::Error> {
+    pub async fn delete_user(client: &Client, user_id: String) -> Result<DeleteResponse, ClientError> {
         let url = format!("{}{}{}", client.base_url, "users/", user_id);
 
+        let res = client.http_client.delete(&url).send().await.map_err(ClientError::Reqwest)?;
+        let status = res.status();
 
-        match client.http_client.delete(&url).send().await {
-            Ok(response) => {
-                match response.json::<DeleteResponse>().await {
-                    Ok(user) => Ok(user),
-                    Err(e) => Err(e),
-                }
-            }
-            Err(e) => Err(e),
+        if status.is_success() {
+            let body = res.json::<DeleteResponse>().await.map_err(ClientError::Reqwest)?;
+            Ok(body)
+        } else {
+            let err_body: ErrorResponse = res.json().await?;
+
+            Err(ClientError::ErrorResponse(err_body))
         }
     }
 
-    pub async fn create_user(client: &Client, params: CreateUserParams) -> Result<User, reqwest::Error> {
+    pub async fn create_user(client: &Client, params: CreateUserParams) -> Result<User, ClientError> {
         let url = format!("{}{}", client.base_url, "users");
 
-        match client.http_client.post(&url).json(&params).send().await {
-            Ok(response) => {
-                match response.json::<User>().await {
-                    Ok(user) => Ok(user),
-                    Err(e) => Err(e),
-                }
-            }
-            Err(e) => Err(e),
+        let res = client.http_client.post(&url).json(&params).send().await.map_err(ClientError::Reqwest)?;
+        let status = res.status();
+
+        if status.is_success() {
+            let body = res.json::<User>().await.map_err(ClientError::Reqwest)?;
+            Ok(body)
+        } else {
+            let err_body: ErrorResponse = res.json().await?;
+
+            Err(ClientError::ErrorResponse(err_body))
         }
     }
 
-    pub async fn update_user(client: &Client, user_id: String, params: UpdateUserParams) -> Result<User, reqwest::Error> {
+    pub async fn update_user(client: &Client, user_id: String, params: UpdateUserParams) -> Result<User, ClientError> {
         let url = format!("{}{}{}", client.base_url, "users/", user_id);
-            
-        match client.http_client.patch(&url).json(&params).send().await {
-            Ok(response) => {
-                match response.json::<User>().await {
-                    Ok(user) => Ok(user),
-                    Err(e) => Err(e),
-                }
-            }
-            Err(e) => Err(e),
+
+        let res = client.http_client.patch(&url).json(&params).send().await.map_err(ClientError::Reqwest)?;
+        let status = res.status();
+
+        if status.is_success() {
+            let body = res.json::<User>().await.map_err(ClientError::Reqwest)?;
+            Ok(body)
+        } else {
+            let err_body: ErrorResponse = res.json().await?;
+
+            Err(ClientError::ErrorResponse(err_body))
         }
     }
 
-    pub async fn update_user_metadata(client: &Client, user_id: String, metadata_request: UpdateUserMetadata) -> Result<User, reqwest::Error> {
+    pub async fn update_user_metadata(client: &Client, user_id: String, metadata_request: UpdateUserMetadata) -> Result<User, ClientError> {
         let url = format!("{}{}{}/metadata", client.base_url, "users/", user_id);
 
-        client.http_client.patch(&url).json(&metadata_request).send().await?.json::<User>().await
-    }
+        let res = client.http_client.patch(&url).json(&metadata_request).send().await.map_err(ClientError::Reqwest)?;
+        let status = res.status();
 
-    pub async fn ban_user(client: &Client, user_id: String) -> Result<User, reqwest::Error> {
-        let url = format!("{}{}{}/ban", client.base_url, "users/", user_id);
+        if status.is_success() {
+            let body = res.json::<User>().await.map_err(ClientError::Reqwest)?;
+            Ok(body)
+        } else {
+            let err_body: ErrorResponse = res.json().await?;
 
-        match client.http_client.post(&url).send().await {
-            Ok(response) => {
-                match response.json::<User>().await {
-                    Ok(user) => Ok(user),
-                    Err(e) => Err(e),
-                }
-            }
-            Err(e) => Err(e),
+            Err(ClientError::ErrorResponse(err_body))
         }
     }
 
-    pub async fn unban_user(client: &Client, user_id: String) -> Result<User, reqwest::Error> {
+    pub async fn ban_user(client: &Client, user_id: String) -> Result<User, ClientError> {
+        let url = format!("{}{}{}/ban", client.base_url, "users/", user_id);
+
+        let res = client.http_client.post(&url).send().await.map_err(ClientError::Reqwest)?;
+        let status = res.status();
+
+        if status.is_success() {
+            let body = res.json::<User>().await.map_err(ClientError::Reqwest)?;
+            Ok(body)
+        } else {
+            let err_body: ErrorResponse = res.json().await?;
+
+            Err(ClientError::ErrorResponse(err_body))
+        }
+    }
+
+    pub async fn unban_user(client: &Client, user_id: String) -> Result<User, ClientError> {
         let url = format!("{}{}{}/unban", client.base_url, "users/", user_id);
 
-        match client.http_client.post(&url).send().await {
-            Ok(response) => {
-                match response.json::<User>().await {
-                    Ok(user) => Ok(user),
-                    Err(e) => Err(e),
-                }
-            }
-            Err(e) => Err(e),
+        let res = client.http_client.post(&url).send().await.map_err(ClientError::Reqwest)?;
+        let status = res.status();
+
+        if status.is_success() {
+            let body = res.json::<User>().await.map_err(ClientError::Reqwest)?;
+            Ok(body)
+        } else {
+            let err_body: ErrorResponse = res.json().await?;
+
+            Err(ClientError::ErrorResponse(err_body))
         }
     }
 }
