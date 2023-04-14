@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::Client;
+use crate::{Client, error::{ClientError, ErrorResponse}};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct EmailResponse {
@@ -31,17 +31,20 @@ pub struct Email {}
 
 impl Email {
 
-    pub async fn create_email(client: &Client, email: EmailParams) -> Result<EmailResponse, reqwest::Error> {
+    pub async fn create_email(client: &Client, email: EmailParams) -> Result<EmailResponse, ClientError> {
         let url = format!("{}{}", client.base_url, "emails");
 
-        match client.http_client.post(&url).json(&email).send().await {
-            Ok(res) => {
-                match res.json::<EmailResponse>().await {
-                    Ok(res) => Ok(res),
-                    Err(e) => Err(e),
-                }
-            }
-            Err(e) => Err(e),
+        let res = client.http_client.post(&url).json(&email).send().await.map_err(ClientError::Reqwest)?;
+        let status = res.status();
+
+        if status.is_success() {
+            let body = res.json::<EmailResponse>().await.map_err(ClientError::Reqwest)?;
+
+            Ok(body)
+        } else {
+            let err_body: ErrorResponse = res.json().await?;
+
+            Err(ClientError::ErrorResponse(err_body))
         }
     }
 }

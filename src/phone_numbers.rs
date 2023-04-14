@@ -1,6 +1,6 @@
 use serde::{Serialize, Deserialize};
 
-use crate::Client;
+use crate::{Client, error::{ErrorResponse, ClientError}};
 
 pub struct PhoneNumbers;
 
@@ -27,27 +27,37 @@ impl PhoneNumbers {
     pub async fn create(
         client: &Client,
         params: PhoneNumberParams,
-    ) -> Result<CreatePhoneNumberResponse, reqwest::Error> {
+    ) -> Result<CreatePhoneNumberResponse, ClientError> {
         let url = format!("{}{}", client.base_url, "phone_numbers");
 
-        match client.http_client.post(&url).json(&params).send().await {
-            Ok(response) => match response.json::<CreatePhoneNumberResponse>().await {
-                Ok(user) => Ok(user),
-                Err(e) => Err(e),
-            },
-            Err(e) => Err(e),
+        let res = client.http_client.post(&url).json(&params).send().await?;
+        let status = res.status();
+
+        if status.is_success() {
+            let body = res.json::<CreatePhoneNumberResponse>().await?;
+
+            Ok(body)
+        } else {
+            let err_body: ErrorResponse = res.json().await?;
+
+            Err(ClientError::ErrorResponse(err_body))
         }
     }
 
-    pub async fn retrive(client: &Client, id: &str) -> Result<CreatePhoneNumberResponse, reqwest::Error> {
+    pub async fn retrive(client: &Client, id: &str) -> Result<CreatePhoneNumberResponse, ClientError> {
         let url = format!("{}{}{}", client.base_url, "phone_numbers/", id);
+        
+        let res = client.http_client.get(&url).send().await?;
+        let status = res.status();
 
-        match client.http_client.get(&url).send().await {
-            Ok(response) => match response.json::<CreatePhoneNumberResponse>().await {
-                Ok(user) => Ok(user),
-                Err(e) => Err(e),
-            },
-            Err(e) => Err(e),
+        if status.is_success() {
+            let body = res.json::<CreatePhoneNumberResponse>().await?;
+
+            Ok(body)
+        } else {
+            let err_body: ErrorResponse = res.json().await?;
+
+            Err(ClientError::ErrorResponse(err_body))
         }
     }
 }

@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::Client;
+use crate::{Client, error::{ClientError, ErrorResponse}};
 
 pub struct ActorTokens {}
 
@@ -39,30 +39,40 @@ impl ActorTokens {
     pub async fn create_actor_token(
         client: &Client,
         params: &ActorTokenParams,
-    ) -> Result<ActorTokenResponse, reqwest::Error> {
+    ) -> Result<ActorTokenResponse, ClientError> {
         let url = format!("{}{}", client.base_url, "actor-tokens");
 
-        match client.http_client.post(&url).json(&params).send().await {
-            Ok(response) => match response.json::<ActorTokenResponse>().await {
-                Ok(token) => Ok(token),
-                Err(e) => Err(e),
-            },
-            Err(e) => Err(e),
+        let res = client.http_client.post(&url).json(&params).send().await?;
+        let status = res.status();
+
+        if status.is_success() {
+            let body = res.json::<ActorTokenResponse>().await?;
+
+            Ok(body)
+        } else {
+            let err_body: ErrorResponse = res.json().await?;
+
+            Err(ClientError::ErrorResponse(err_body))
         }
     }
 
     pub async fn revoke_actor_token(
         client: &Client,
         token_id: String,
-    ) -> Result<ActorTokenResponse, reqwest::Error> {
+    ) -> Result<ActorTokenResponse, ClientError> {
         let url = format!("{}{}{}", client.base_url, "actor-tokens/", token_id);
 
-        match client.http_client.delete(&url).send().await {
-            Ok(response) => match response.json::<ActorTokenResponse>().await {
-                Ok(token) => Ok(token),
-                Err(e) => Err(e),
-            },
-            Err(e) => Err(e),
+        let res = client.http_client.delete(&url).send().await?;
+        let status = res.status();
+
+        if status.is_success() {
+            let body = res.json::<ActorTokenResponse>().await?;
+
+            Ok(body)
+        } else {
+            let err_body: ErrorResponse = res.json().await?;
+
+            Err(ClientError::ErrorResponse(err_body))
         }
     }
 }
