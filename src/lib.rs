@@ -3,6 +3,7 @@ use reqwest::header::{HeaderMap, AUTHORIZATION};
 mod error;
 
 pub mod actor_tokens;
+pub mod clients;
 pub mod emails;
 pub mod model;
 pub mod phone_numbers;
